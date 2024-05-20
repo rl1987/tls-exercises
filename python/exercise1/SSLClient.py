@@ -20,15 +20,21 @@ def main():
     #      https://github.com/mikepound/tls-exercises/blob/master/python/README.md
 
     # Create a standard TCP Socket
-    sock = None
+    sock = socket.socket()
 
     # Create SSL context which holds the parameters for any sessions
-    context = None
+    context = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    context.load_verify_locations(cafile=CA_CERT)
+
+    print("context", context)
 
     # We can wrap in an SSL context first, then connect
-    conn = None
+    conn = context.wrap_socket(sock, server_hostname="Expert TLS Server")
+    print("conn", conn)
+
     try:
         # Connect using conn
+        conn.connect((LOCAL_HOST, LOCAL_PORT))
 
         # The code below is complete, it will use a connection to send and receive from the server
 
@@ -43,9 +49,9 @@ def main():
 
         # Receive a number back from the server
         server_response = conn.recv(1024)
-
+    
         # Server response is an int, convert it back
-        print(int.from_bytes(server_response, 'big'))
+        print("RESP:", int.from_bytes(server_response, 'big'))
     finally:
         if conn is not None:
             conn.close()
